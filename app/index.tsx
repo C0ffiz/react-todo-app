@@ -1,87 +1,128 @@
 import React from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export default function App() {
+  const [task, setTask] = React.useState('');
+  const [tasks, setTasks] = React.useState([]);
 
-const App = () => {
+  function carregarTarefas() {
+    AsyncStorage.getItem('tasks')
+      .then(tarefasSalvas => {
+        if (tarefasSalvas) {
+          setTasks(JSON.parse(tarefasSalvas));
+        }
+      });
+  }
+
+  React.useEffect(() => {
+    carregarTarefas();
+  }, []);
+
+  function adicionarTarefa() {
+    if (task === '') return;
+
+    const novaTarefa = {
+      id: Date.now(),
+      text: task
+    };
+
+    const novaListaDeTarefas = tasks.concat([novaTarefa]);
+    setTasks(novaListaDeTarefas);
+    setTask('');
+
+    AsyncStorage.setItem('tasks', JSON.stringify(novaListaDeTarefas));
+  }
+
   return (
-    <View style={styles.container} >
-      <View style={styles.imageContainer}>
-        <Image style={styles.image} source={require('../assets/images/circle.png')}/>
-      
-      
-        <Image style={styles.image} source={require('../assets/images/circle.png')}/>
-      
-      
-        <Image style={styles.image} source={require('../assets/images/circle.png')}/>
-     
-     
-        <Image style={styles.image} source={require('../assets/images/circle.png')}/>
-      </View>
-      <View style={styles.separator} />
-      <View style={styles.squareView}>
-        <Image
-          source={require('../assets/images/square.png')}
-          style={styles.squareImage}
+    <SafeAreaView style={styles.screen}>
+      <StatusBar style="light" />
+      <View style={styles.container}>
+        <Text style={styles.title}>Tarefas</Text>
+
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Adicione uma tarefa"
+            value={task}
+            onChangeText={text => setTask(text)}
+            placeholderTextColor="#555"
+          />
+
+          <TouchableOpacity style={styles.button} onPress={adicionarTarefa}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          style={styles.list}
+          data={tasks}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.taskContainer}>
+              <Text style={styles.taskText}>{item.text}</Text>
+            </View>
+          )}
         />
       </View>
-      <View>
-        <Text>Texto</Text>
-      </View>
-      <View style={styles.viewsSeila}>
-        <View style={styles.image2}>
-          
-        </View>
-        <View style={styles.image2}>
-          
-        </View>
-        <View style={styles.image2}>
-          
-        </View>
-      </View>
-    </View>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#121214',
+  },
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
+    padding: 24,
   },
-  imageContainer: {
+  title: {
+    color: '#f1f1f1',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 24,
+  },
+  form: {
     flexDirection: 'row',
-    paddingTop: -10,
+    marginTop: 24,
+    marginBottom: 32,
   },
-  viewsSeila: {
-    flexDirection: 'row',
-    paddingTop: -10,
+  input: {
+    flex: 1,
+    height: 56,
+    backgroundColor: '#29292e',
+    borderRadius: 5,
+    color: '#f1f1f1',
+    padding: 16,
+    fontSize: 16,
+    marginRight: 12,
   },
-  image: {
-    width: 94, 
-    height: 94, 
-    marginRight: 10, 
-  },
-  image2: {
-    width: 94, 
-    height: 200, 
-    marginRight: 10, 
-    backgroundColor: 'grey'
-  },
-  squareView: {
-    width: '100%', 
-    height: 200, 
-    justifyContent: 'center',
+  button: {
+    width: 56,
+    height: 56,
+    borderRadius: 5,
+    backgroundColor: '#31cf67',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  squareImage: {
-    width: '100%', 
-    height: '100%', 
-    resizeMode: 'cover', 
+  buttonText: {
+    color: '#fff',
+    fontSize: 24,
   },
-  separator: {
-    height: 2,
-    backgroundColor: 'black', 
-    width: '100%', 
+  list: {
+    marginTop: 32,
+  },
+  taskContainer: {
+    backgroundColor: '#29292e',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  taskText: {
+    color: '#f1f1f1',
+    fontSize: 16,
   },
 });
-
-export default App;
