@@ -62,7 +62,9 @@ export default function App() {
   }
 
   function deletarTarefa(id) {
-    setTarefas(tarefas.filter(t => t.id !== id));
+    const novaListaDeTarefas = tarefas.filter(t => t.id !== id);
+    setTarefas(novaListaDeTarefas);
+    AsyncStorage.setItem('tasks', JSON.stringify(novaListaDeTarefas));
   }
 
   function editarTarefa(tarefa) {
@@ -72,12 +74,14 @@ export default function App() {
   }
 
   function salvarEdicao() {
-    setTarefas(tarefas.map(t => 
+    const novaListaDeTarefas = tarefas.map(t => 
       t.id === idEdicao 
         ? {...t, texto: textoEdicao, descricao: descricaoEdicao}
         : t
-    ));
+    );
+    setTarefas(novaListaDeTarefas);
     setIdEdicao(null);
+    AsyncStorage.setItem('tasks', JSON.stringify(novaListaDeTarefas));
   }
 
   return (
